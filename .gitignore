@@ -1,0 +1,21 @@
+# Залежності
+node_modules/
+dist/
+build/
+.next/
+
+# Середовище (Секрети)
+.env
+.env.local
+.env.development.local
+
+# Логи та тимчасові файли
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+.vscode/
+.idea/
+
+# Специфічне для БД та Docker
+pgdata/
+minio_data/

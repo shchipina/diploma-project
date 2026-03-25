@@ -15,7 +15,8 @@
       "@config/*": ["src/config/*"],
       "@modules/*": ["src/modules/*"],
       "@common/*": ["src/common/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@prisma/generated/prisma": ["./generated/prisma"]
     },
     "incremental": true,
     "skipLibCheck": true,
@@ -27,6 +28,6 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*", "test/**/*"],
+  "include": ["src/**/*", "test/**/*", "prisma.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -4,11 +4,11 @@ services:
     container_name: medium-db
     restart: always
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: medium_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -16,14 +16,14 @@ services:
     image: redis:alpine
     container_name: medium-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
   minio:
     image: minio/minio
     container_name: medium-minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000'
+      - '9001:9001'
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: password

@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+dist
+build
+.next
+.nuxt
+out
+
+# Build outputs
+*.tsbuildinfo
+.cache
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs
+
+# Coverage
+coverage
+.nyc_output
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Prisma
+prisma/migrations
+
+# Package manager
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+bun.lockb
+
+# Docker
+docker-compose.override.yml

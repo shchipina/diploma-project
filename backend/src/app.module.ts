@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { PrismaModule } from '@modules/prisma/prisma.module';
 import { RedisModule } from '@modules/redis/redis.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { MinioModule } from '@modules/minio/minio.module';
+import { PublicationsModule } from '@modules/publications/publications.module';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
 
 @Module({
@@ -17,6 +19,8 @@ import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
     PrismaModule,
     RedisModule,
     AuthModule,
+    MinioModule,
+    PublicationsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -12,6 +12,12 @@ enum Role {
   ADMIN
 }
 
+enum PublicationStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -20,6 +26,58 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  publications      Publication[]
+  savedPublications SavedPublication[]
+
   @@map("users")
+}
+
+model Tag {
+  id           String           @id @default(uuid())
+  name         String           @unique
+  publications PublicationTag[]
+
+  @@map("tags")
+}
+
+model Publication {
+  id          String            @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String?
+  status      PublicationStatus @default(PENDING)
+  viewCount   Int               @default(0)
+  authorId    String
+  author      User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  tags        PublicationTag[]
+  savedBy     SavedPublication[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([authorId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("publications")
+}
+
+model PublicationTag {
+  publicationId String
+  tagId         String
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([publicationId, tagId])
+  @@map("publication_tags")
+}
+
+model SavedPublication {
+  userId        String
+  publicationId String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  publication   Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  savedAt       DateTime    @default(now())
+
+  @@id([userId, publicationId])
+  @@map("saved_publications")
 }
 

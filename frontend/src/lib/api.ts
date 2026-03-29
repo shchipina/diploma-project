@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '@/store/auth.store';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -21,6 +22,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -29,17 +42,31 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          addRefreshSubscriber((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
+      isRefreshing = true;
+
       try {
         const { data } = await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
 
         localStorage.setItem('accessToken', data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
 
+        onRefreshed(data.accessToken);
         return api(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem('accessToken');
-        window.location.href = '/auth';
+        useAuthStore.getState().clearAuth();
+        refreshSubscribers = [];
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

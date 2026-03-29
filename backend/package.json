@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.3.0",
@@ -37,6 +38,7 @@
     "handlebars": "^4.7.8",
     "helmet": "^8.1.0",
     "ioredis": "^5.10.1",
+    "minio": "^8.0.7",
     "nodemailer": "^8.0.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -57,6 +59,8 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/minio": "^7.1.0",
+    "@types/multer": "^2.1.0",
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.11.11",
@@ -74,8 +78,12 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   },
   "jest": {
     "moduleFileExtensions": [

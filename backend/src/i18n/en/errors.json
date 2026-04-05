@@ -1,0 +1,28 @@
+{
+  "errors": {
+    "VALIDATION_ERROR": "Validation error occurred",
+    "AUTH_ERROR": "Authentication failed",
+    "AUTHORIZATION_ERROR": "Access denied",
+    "BUSINESS_ERROR": "Business logic error",
+    "NOT_FOUND": "Resource not found",
+    "CONFLICT_ERROR": "Resource already exists",
+    "INTERNAL_SERVER_ERROR": "Internal server error",
+    "UNKNOWN_ERROR": "An unexpected error occurred"
+  },
+  "messages": {
+    "invalidCredentials": "Invalid email or password",
+    "userAlreadyExists": "User with this email already exists",
+    "userNotFound": "User not found",
+    "tokenRequired": "Token is required",
+    "tokenExpired": "Token has expired",
+    "tokenInvalid": "Invalid token",
+    "accessDenied": "You don't have permission to perform this action",
+    "resourceNotFound": "The requested resource was not found",
+    "serverError": "Something went wrong on our end. Please try again later"
+  },
+  "fields": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name"
+  }
+}

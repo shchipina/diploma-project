@@ -1,11 +1,13 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
   BadRequestException,
+  Inject,
+  LoggerService,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@modules/prisma/prisma.service';
 import { RedisService } from '@modules/redis/redis.service';
@@ -19,6 +21,10 @@ import {
 } from '@common/interfaces/jwt-payload.interface';
 import { Role } from '@common/enums/role.enum';
 import { User } from '@prisma/generated/prisma';
+import {
+  ConflictException as AppConflictException,
+  AuthenticationException,
+} from '@common/exceptions';
 
 @Injectable()
 export class AuthService {
@@ -29,15 +35,28 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private redisService: RedisService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {}
 
   async register(dto: RegisterDto): Promise<LoginResponse> {
+    this.logger.log(
+      `Registration attempt for email: ${dto.email}`,
+      'AuthService',
+    );
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      this.logger.warn(
+        `Registration failed: User ${dto.email} already exists`,
+        'AuthService',
+      );
+      throw new AppConflictException('User with this email already exists', {
+        email: dto.email,
+      });
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
@@ -49,6 +68,11 @@ export class AuthService {
         role: Role.USER,
       },
     });
+
+    this.logger.log(
+      `User registered successfully: ${user.email} (ID: ${user.id})`,
+      'AuthService',
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
@@ -63,23 +87,42 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<LoginResponse> {
+    this.logger.log(`Login attempt for email: ${dto.email}`, 'AuthService');
+
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      this.logger.warn(
+        `Login failed: User ${dto.email} not found`,
+        'AuthService',
+      );
+      throw new AuthenticationException('Invalid credentials', {
+        email: dto.email,
+      });
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      this.logger.warn(
+        `Login failed: Invalid password for ${dto.email}`,
+        'AuthService',
+      );
+      throw new AuthenticationException('Invalid credentials', {
+        email: dto.email,
+      });
     }
 
     const tokens = await this.generateTokenPair(user);
 
     await this.saveRefreshTokenToRedis(user.id, tokens.refreshToken);
+
+    this.logger.log(
+      `User logged in successfully: ${user.email} (ID: ${user.id})`,
+      'AuthService',
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
@@ -91,6 +134,11 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string, userId: string): Promise<TokenPair> {
+    this.logger?.debug?.(
+      `Token refresh attempt for user: ${userId}`,
+      'AuthService',
+    );
+
     if (!refreshToken) {
       throw new BadRequestException('Refresh token is required');
     }
@@ -101,7 +149,11 @@ export class AuthService {
       });
 
       if (payload.sub !== userId) {
-        throw new UnauthorizedException('Invalid token');
+        this.logger.warn(
+          `Token refresh failed: User ID mismatch for ${userId}`,
+          'AuthService',
+        );
+        throw new AuthenticationException('Invalid token', { userId });
       }
 
       const isValid = await this.redisService.validateRefreshToken(
@@ -110,7 +162,13 @@ export class AuthService {
       );
 
       if (!isValid) {
-        throw new UnauthorizedException('Invalid or expired refresh token');
+        this.logger.warn(
+          `Token refresh failed: Invalid refresh token for ${userId}`,
+          'AuthService',
+        );
+        throw new AuthenticationException('Invalid or expired refresh token', {
+          userId,
+        });
       }
 
       const user = await this.prisma.user.findUnique({
@@ -118,21 +176,42 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        this.logger.warn(
+          `Token refresh failed: User ${userId} not found`,
+          'AuthService',
+        );
+        throw new AuthenticationException('User not found', { userId });
       }
 
       const tokens = await this.generateTokenPair(user);
 
       await this.saveRefreshTokenToRedis(user.id, tokens.refreshToken);
 
+      this.logger.log(
+        `Token refreshed successfully for user: ${userId}`,
+        'AuthService',
+      );
+
       return tokens;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      if (error instanceof AuthenticationException) {
+        throw error;
+      }
+      this.logger.error(
+        `Token refresh error for user ${userId}`,
+        JSON.stringify({
+          error: error instanceof Error ? error.message : String(error),
+        }),
+        'AuthService',
+      );
+      throw new AuthenticationException('Invalid or expired refresh token', {
+        userId,
+      });
     }
   }
 
   async logout(userId: string): Promise<{ message: string }> {
+    this.logger.log(`User logged out: ${userId}`, 'AuthService');
     await this.redisService.deleteRefreshToken(userId);
     return { message: 'Logged out successfully' };
   }

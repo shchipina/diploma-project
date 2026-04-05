@@ -1,0 +1,28 @@
+{
+  "errors": {
+    "VALIDATION_ERROR": "Помилка валідації",
+    "AUTH_ERROR": "Помилка автентифікації",
+    "AUTHORIZATION_ERROR": "Доступ заборонено",
+    "BUSINESS_ERROR": "Помилка бізнес-логіки",
+    "NOT_FOUND": "Ресурс не знайдено",
+    "CONFLICT_ERROR": "Ресурс вже існує",
+    "INTERNAL_SERVER_ERROR": "Внутрішня помилка сервера",
+    "UNKNOWN_ERROR": "Виникла непередбачена помилка"
+  },
+  "messages": {
+    "invalidCredentials": "Невірний email або пароль",
+    "userAlreadyExists": "Користувач з цією електронною поштою вже існує",
+    "userNotFound": "Користувача не знайдено",
+    "tokenRequired": "Токен обов'язковий",
+    "tokenExpired": "Термін дії токена закінчився",
+    "tokenInvalid": "Невірний токен",
+    "accessDenied": "У вас немає прав для виконання цієї дії",
+    "resourceNotFound": "Запитуваний ресурс не знайдено",
+    "serverError": "Щось пішло не так на нашій стороні. Будь ласка, спробуйте пізніше"
+  },
+  "fields": {
+    "email": "Електронна пошта",
+    "password": "Пароль",
+    "name": "Ім'я"
+  }
+}

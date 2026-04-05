@@ -3,11 +3,14 @@ import { useLogout } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const logoutMutation = useLogout();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -35,6 +38,10 @@ export function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="fixed top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="text-3xl">Платформа обміну навичками</CardTitle>
@@ -64,7 +71,7 @@ export function HomePage() {
               className="w-full"
               disabled={logoutMutation.isPending}
             >
-              {logoutMutation.isPending ? 'Вихід...' : 'Вийти'}
+              {logoutMutation.isPending ? 'Вихід...' : t('logout')}
             </Button>
           </div>
         </CardContent>

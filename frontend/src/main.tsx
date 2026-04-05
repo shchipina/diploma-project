@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './index.css';
 import App from './App.tsx';
 import { queryClient } from './lib/query-client';
+import './i18n/config';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

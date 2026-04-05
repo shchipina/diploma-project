@@ -1,11 +1,21 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, LoggerService } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/filters';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  const logger = app.get<LoggerService>(WINSTON_MODULE_NEST_PROVIDER);
+  app.useLogger(logger);
+
+  app.useGlobalFilters(new GlobalExceptionFilter(logger));
+
   app.use(cookieParser());
 
   app.useGlobalPipes(
@@ -61,16 +71,23 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Trace-ID'],
+    exposedHeaders: ['X-Trace-ID'],
   });
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(
-    `🚀 Application is running on: http://localhost:${process.env.PORT ?? 3000}`,
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+
+  logger.log(
+    `Application is running on: http://localhost:${port}`,
+    'Bootstrap',
   );
-  console.log(
-    `📚 Swagger API Documentation: http://localhost:${process.env.PORT ?? 3000}/api/docs`,
+  logger.log(
+    `Swagger API Documentation: http://localhost:${port}/api/docs`,
+    'Bootstrap',
   );
+  logger.log(`Log Level: ${process.env.LOG_LEVEL || 'info'}`, 'Bootstrap');
+  logger.log(`Trace ID tracking enabled`, 'Bootstrap');
 }
 
 void bootstrap();

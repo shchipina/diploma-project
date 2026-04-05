@@ -20,7 +20,7 @@ import {
   LoginResponse,
 } from '@common/interfaces/jwt-payload.interface';
 import { Role } from '@common/enums/role.enum';
-import { User } from '@prisma/generated/prisma';
+import { User } from '@prisma/client';
 import {
   ConflictException as AppConflictException,
   AuthenticationException,

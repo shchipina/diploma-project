@@ -15,8 +15,7 @@
       "@config/*": ["src/config/*"],
       "@modules/*": ["src/modules/*"],
       "@common/*": ["src/common/*"],
-      "@utils/*": ["src/utils/*"],
-      "@prisma/generated/prisma": ["./generated/prisma"]
+      "@utils/*": ["src/utils/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

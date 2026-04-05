@@ -6,7 +6,7 @@ import { Roles } from '@modules/auth/decorators/roles.decorator';
 import { RolesGuard } from '@modules/auth/guards/roles.guard';
 import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
 import { Role } from '@common/enums/role.enum';
-import { User } from '@prisma/generated/prisma';
+import { User } from '@prisma/client';
 
 @ApiTags('app')
 @Controller()

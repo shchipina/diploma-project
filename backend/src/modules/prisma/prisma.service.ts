@@ -5,7 +5,7 @@ import {
   Inject,
   LoggerService,
 } from '@nestjs/common';
-import { PrismaClient } from '@prisma/generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';

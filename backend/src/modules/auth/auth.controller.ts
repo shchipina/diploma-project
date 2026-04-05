@@ -24,7 +24,7 @@ import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { User } from '@prisma/generated/prisma';
+import { User } from '@prisma/client';
 
 @ApiTags('auth')
 @Controller('auth')

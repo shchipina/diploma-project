@@ -28,6 +28,12 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*", "test/**/*", "prisma.config.ts"],
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "prisma.config.ts",
+    "prisma/**/*",
+    "artillery/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }

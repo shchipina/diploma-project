@@ -6,7 +6,7 @@ import { LoginForm } from '@/components/LoginForm';
 import { RegisterForm } from '@/components/RegisterForm';
 import { useAuthStore } from '@/store/auth.store';
 
-export function AuthPage() {
+function AuthPage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const [activeTab, setActiveTab] = useState<string>('login');
@@ -206,3 +206,5 @@ export function AuthPage() {
     </div>
   );
 }
+
+export default AuthPage;

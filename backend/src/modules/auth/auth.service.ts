@@ -20,7 +20,7 @@ import {
   LoginResponse,
 } from '@common/interfaces/jwt-payload.interface';
 import { Role } from '@common/enums/role.enum';
-import { User } from '@prisma/generated/prisma';
+import { User } from '@prisma/client';
 import {
   ConflictException as AppConflictException,
   AuthenticationException,
@@ -47,6 +47,7 @@ export class AuthService {
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
+      select: { id: true, email: true },
     });
 
     if (existingUser) {
@@ -74,6 +75,8 @@ export class AuthService {
       'AuthService',
     );
 
+    await this.redisService.cacheUserByEmail(user.email, user, 300);
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
 
@@ -89,9 +92,40 @@ export class AuthService {
   async login(dto: LoginDto): Promise<LoginResponse> {
     this.logger.log(`Login attempt for email: ${dto.email}`, 'AuthService');
 
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const cacheKey = dto.email;
+    let user = await this.redisService.getCachedUserByEmail(cacheKey);
+
+    if (user) {
+      this.logger.debug(
+        `Cache HIT: User ${dto.email} retrieved from cache`,
+        'AuthService',
+      );
+    } else {
+      this.logger.debug(
+        `Cache MISS: Fetching user ${dto.email} from database`,
+        'AuthService',
+      );
+
+      user = (await this.prisma.user.findUnique({
+        where: { email: dto.email },
+        select: {
+          id: true,
+          email: true,
+          password: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })) as User | null;
+
+      if (user) {
+        await this.redisService.cacheUserByEmail(dto.email, user, 300);
+        this.logger.debug(
+          `User ${dto.email} cached for 5 minutes`,
+          'AuthService',
+        );
+      }
+    }
 
     if (!user) {
       this.logger.warn(
@@ -171,9 +205,17 @@ export class AuthService {
         });
       }
 
-      const user = await this.prisma.user.findUnique({
+      const user = (await this.prisma.user.findUnique({
         where: { id: userId },
-      });
+        select: {
+          id: true,
+          email: true,
+          password: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })) as User | null;
 
       if (!user) {
         this.logger.warn(

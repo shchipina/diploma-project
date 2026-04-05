@@ -15,6 +15,25 @@ interface RequestWithUser extends Request {
   };
 }
 
+interface PerformanceMetrics {
+  method: string;
+  url: string;
+  statusCode: number;
+  responseTime: string;
+  responseTimeMs: number;
+  ip: string;
+  userAgent: string;
+  traceId: string | undefined;
+  userId: string | undefined;
+  memoryUsage?: {
+    heapUsed: string;
+    heapTotal: string;
+    external: string;
+    rss: string;
+  };
+  contentLength?: number;
+}
+
 @Injectable()
 export class HttpLoggerMiddleware implements NestMiddleware {
   constructor(
@@ -30,34 +49,52 @@ export class HttpLoggerMiddleware implements NestMiddleware {
     res.on('finish', () => {
       const { statusCode } = res;
       const responseTime = Date.now() - startTime;
+      const endMemory = process.memoryUsage();
       const traceId = getTraceId();
-
       const userId = (req as RequestWithUser).user?.id;
 
-      const logData = {
+      const contentLength = res.get('content-length');
+
+      const logData: PerformanceMetrics = {
         method,
         url: originalUrl,
         statusCode,
         responseTime: `${responseTime}ms`,
+        responseTimeMs: responseTime,
         ip,
         userAgent,
         traceId,
         userId,
+        contentLength: contentLength ? parseInt(contentLength, 10) : undefined,
       };
+
+      if (responseTime > 1000 || process.env.LOG_LEVEL === 'debug') {
+        logData.memoryUsage = {
+          heapUsed: `${Math.round(endMemory.heapUsed / 1024 / 1024)}MB`,
+          heapTotal: `${Math.round(endMemory.heapTotal / 1024 / 1024)}MB`,
+          external: `${Math.round(endMemory.external / 1024 / 1024)}MB`,
+          rss: `${Math.round(endMemory.rss / 1024 / 1024)}MB`,
+        };
+      }
 
       if (statusCode >= 500) {
         this.logger.error(
-          `HTTP ${method} ${originalUrl} ${statusCode}`,
+          `HTTP ${method} ${originalUrl} ${statusCode} - ${responseTime}ms`,
           JSON.stringify(logData),
         );
       } else if (statusCode >= 400) {
         this.logger.warn(
-          `HTTP ${method} ${originalUrl} ${statusCode}`,
+          `HTTP ${method} ${originalUrl} ${statusCode} - ${responseTime}ms`,
+          JSON.stringify(logData),
+        );
+      } else if (responseTime > 1000) {
+        this.logger.warn(
+          `Slow response: HTTP ${method} ${originalUrl} ${statusCode} - ${responseTime}ms`,
           JSON.stringify(logData),
         );
       } else {
         this.logger.log(
-          `HTTP ${method} ${originalUrl} ${statusCode}`,
+          `HTTP ${method} ${originalUrl} ${statusCode} - ${responseTime}ms`,
           JSON.stringify(logData),
           'HTTP',
         );

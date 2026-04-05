@@ -6,6 +6,9 @@ import './index.css';
 import App from './App.tsx';
 import { queryClient } from './lib/query-client';
 import './i18n/config';
+import { initWebVitals } from './utils/web-vitals';
+
+initWebVitals();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

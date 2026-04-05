@@ -26,7 +26,7 @@ import { TraceIdMiddleware, HttpLoggerMiddleware } from './common/middleware';
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: path.join(__dirname, '/i18n/'),
+        path: path.join(process.cwd(), 'src/i18n/'),
         watch: true,
       },
       resolvers: [
@@ -35,7 +35,7 @@ import { TraceIdMiddleware, HttpLoggerMiddleware } from './common/middleware';
         new HeaderResolver(['x-lang']),
       ],
     }),
-    LoggerModule, // Winston Logger
+    LoggerModule,
     PrismaModule,
     RedisModule,
     AuthModule,
@@ -51,7 +51,6 @@ import { TraceIdMiddleware, HttpLoggerMiddleware } from './common/middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Застосовуємо middleware до всіх маршрутів
     consumer.apply(TraceIdMiddleware, HttpLoggerMiddleware).forRoutes('*');
   }
 }

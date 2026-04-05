@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
-export function HomePage() {
+function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const logoutMutation = useLogout();
@@ -79,3 +79,5 @@ export function HomePage() {
     </div>
   );
 }
+
+export default HomePage;

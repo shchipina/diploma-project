@@ -6,7 +6,14 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist', 'node_modules', 'eslint.config.mjs', 'coverage'],
+    ignores: [
+      'dist',
+      'node_modules',
+      'eslint.config.mjs',
+      'coverage',
+      'artillery/**/*',
+      'prisma/seed.ts',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

@@ -1,0 +1,74 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 20
+      name: 'Warm up'
+    - duration: 180
+      arrivalRate: 50
+      name: 'Sustained load'
+    - duration: 120
+      arrivalRate: 100
+      name: 'Peak load'
+    - duration: 60
+      arrivalRate: 50
+      name: 'Cool down'
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+  processor: './processor.js'
+
+scenarios:
+  - name: 'User Registration and Login Flow'
+    weight: 20
+    flow:
+      - post:
+          url: '/auth/register'
+          json:
+            email: 'user-{{ $randomString() }}@example.com'
+            name: 'Test User {{ $randomNumber(1, 10000) }}'
+            password: 'Password123!'
+          capture:
+            - json: '$.accessToken'
+              as: 'accessToken'
+      - think: 1
+      - post:
+          url: '/auth/login'
+          json:
+            email: 'test1@example.com'
+            password: 'Password123!'
+
+  - name: 'High-Frequency Login'
+    weight: 60
+    flow:
+      - post:
+          url: '/auth/login'
+          json:
+            email: 'test{{ $randomNumber(1, 5) }}@example.com'
+            password: 'Password123!'
+          capture:
+            - json: '$.accessToken'
+              as: 'accessToken'
+      - get:
+          url: '/auth/me'
+          headers:
+            Authorization: 'Bearer {{ accessToken }}'
+
+  - name: 'Token Refresh Flow'
+    weight: 20
+    flow:
+      - post:
+          url: '/auth/login'
+          json:
+            email: 'test1@example.com'
+            password: 'Password123!'
+          capture:
+            - json: '$.accessToken'
+              as: 'accessToken'
+            - json: '$.refreshToken'
+              as: 'refreshToken'
+      - think: 3
+      - post:
+          url: '/auth/refresh'
+          json:
+            refreshToken: '{{ refreshToken }}'

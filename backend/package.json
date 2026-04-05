@@ -17,7 +17,19 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "profile:doctor": "clinic doctor --on-port 'autocannon -c 10 -d 30 localhost:3000/auth/login' -- node dist/main.js",
+    "profile:flame": "clinic flame --on-port 'autocannon -c 10 -d 30 localhost:3000/auth/login' -- node dist/main.js",
+    "profile:bubbleprof": "clinic bubbleprof --on-port 'autocannon -c 10 -d 30 localhost:3000/auth/login' -- node dist/main.js",
+    "profile:heap": "clinic heapprofiler --on-port 'autocannon -c 10 -d 30 localhost:3000/auth/login' -- node dist/main.js",
+    "test:load:small": "autocannon -c 10 -d 10 -m POST -H 'Content-Type: application/json' -b '{\"email\":\"test@example.com\",\"password\":\"password123\"}' http://localhost:3000/auth/login",
+    "test:load:medium": "autocannon -c 100 -d 30 -m POST -H 'Content-Type: application/json' -b '{\"email\":\"test@example.com\",\"password\":\"password123\"}' http://localhost:3000/auth/login",
+    "test:load:large": "autocannon -c 1000 -d 60 -m POST -H 'Content-Type: application/json' -b '{\"email\":\"test@example.com\",\"password\":\"password123\"}' http://localhost:3000/auth/login",
+    "db:seed": "ts-node prisma/seed.ts",
+    "artillery:small": "artillery run artillery/load-test-small.yml",
+    "artillery:medium": "artillery run artillery/load-test-medium.yml",
+    "artillery:large": "artillery run artillery/load-test-large.yml",
+    "artillery:report": "artillery run artillery/load-test-medium.yml --output artillery/report.json && artillery report artillery/report.json"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.3.0",
@@ -56,6 +68,7 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@prisma/instrumentation": "^7.6.0",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
     "@types/bcrypt": "^6.0.0",
@@ -67,6 +80,9 @@
     "@types/pg": "^8.11.11",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",
+    "artillery": "^2.0.30",
+    "autocannon": "^8.0.0",
+    "clinic": "^13.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -98,6 +114,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "prisma": {
+      "seed": "ts-node prisma/seed.ts"
+    },
     "testEnvironment": "node"
   }
 }

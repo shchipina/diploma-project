@@ -68,6 +68,49 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.client.del(key);
   }
 
+  async cacheUserByEmail(
+    email: string,
+    userData: import('@prisma/client').User,
+    ttlSeconds: number = 300,
+  ): Promise<void> {
+    const key = `user:email:${email}`;
+    await this.client.setex(key, ttlSeconds, JSON.stringify(userData));
+  }
+
+  async getCachedUserByEmail(
+    email: string,
+  ): Promise<import('@prisma/client').User | null> {
+    const key = `user:email:${email}`;
+    const cached = await this.client.get(key);
+    return cached
+      ? (JSON.parse(cached) as import('@prisma/client').User)
+      : null;
+  }
+
+  async invalidateUserCache(email: string): Promise<void> {
+    const key = `user:email:${email}`;
+    await this.client.del(key);
+  }
+
+  async cacheUserById(
+    userId: string,
+    userData: import('@prisma/client').User,
+    ttlSeconds: number = 300,
+  ): Promise<void> {
+    const key = `user:id:${userId}`;
+    await this.client.setex(key, ttlSeconds, JSON.stringify(userData));
+  }
+
+  async getCachedUserById(
+    userId: string,
+  ): Promise<import('@prisma/client').User | null> {
+    const key = `user:id:${userId}`;
+    const cached = await this.client.get(key);
+    return cached
+      ? (JSON.parse(cached) as import('@prisma/client').User)
+      : null;
+  }
+
   getClient(): Redis {
     return this.client;
   }

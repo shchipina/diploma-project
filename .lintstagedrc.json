@@ -3,6 +3,13 @@
     "prettier --write",
     "eslint --fix --config frontend/eslint.config.js"
   ],
-  "backend/**/*.{ts,js}": ["prettier --write", "eslint --fix --config backend/eslint.config.mjs"],
+  "backend/src/**/*.{ts,js}": [
+    "prettier --write",
+    "eslint --fix --config backend/eslint.config.mjs"
+  ],
+  "backend/test/**/*.{ts,js}": [
+    "prettier --write",
+    "eslint --fix --config backend/eslint.config.mjs"
+  ],
   "*.{json,md,yml,yaml}": ["prettier --write"]
 }
